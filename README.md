@@ -2,7 +2,7 @@
 
 ¡Bienvenido a **Taco Tetris Fiesta**! Un videojuego web interactivo desarrollado en **HTML5 Canvas**, **CSS3** y **JavaScript Vanilla** (sin librerías externas). Reemplaza los bloques tradicionales de Tetris por elementos icónicos de la cultura mexicana: tacos, sombreros, banderas, mariachis, piñatas, chiles y cactus.
 
-![Taco Tetris Fiesta Banner](banner.png)
+![Taco Tetris Fiesta Banner](bannermexico.jpg)
 
 ---
 
