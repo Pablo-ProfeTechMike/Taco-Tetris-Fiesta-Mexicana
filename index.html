@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Taco Tetris Fiesta Mexicana 🇲🇽</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO2Jr_Zv9zbKotCgyo_V0Fmes8aULMWun1zQ1oqajHRqlMP6aRK2JHjLY&s=10">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Fredoka One', cursive, 'Outfit', sans-serif;
+            background-color: transparent;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        #bgVideo {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -10;
+            object-fit: cover;
+            filter: brightness(0.4) contrast(1.1);
+        }
+
+        .bg-fallback {
+            background: linear-gradient(135deg, #1b023a 0%, #3a0028 50%, #002217 100%);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff0055;
+            border-radius: 4px;
+        }
+
+        .board-glow {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), inset 0 0 15px rgba(0, 0, 0, 0.8);
+            border: 4px solid #ffcc00;
+        }
+
+        .btn-fiesta {
+            background: linear-gradient(180deg, #ff0055 0%, #b3003b 100%);
+            box-shadow: 0 6px 0 #80002a, 0 10px 15px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+        }
+        .btn-fiesta:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #80002a, 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        .btn-green {
+            background: linear-gradient(180deg, #00e676 0%, #00994d 100%);
+            box-shadow: 0 6px 0 #006633, 0 10px 15px rgba(0,0,0,0.5);
+        }
+        .btn-green:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #006633, 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        .btn-gold {
+            background: linear-gradient(180deg, #ffcc00 0%, #cc9900 100%);
+            box-shadow: 0 6px 0 #997300, 0 10px 15px rgba(0,0,0,0.5);
+            color: #1a1a1a;
+        }
+        .btn-gold:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #997300, 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 2s infinite;
+        }
+
+        .papel-flag {
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+        }
+    </style>
+</head>
+<body class="bg-fallback flex flex-col min-h-screen justify-between relative overflow-x-hidden">
+
+    <video id="bgVideo" autoplay loop muted playsinline poster="https://placehold.co/1920x1080/1a0022/ffd700?text=Fiesta+Mexicana">
+        <source src="mexicoo.mp4" type="video/mp4">
+        <source src="mexicoo.mp4" type="video/mp4">
+    </video>
+
+    <canvas id="fireworksCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+    <header class="w-full z-10 pt-2 px-2">
+        <div class="flex justify-center items-center space-x-2 md:space-x-4 mb-1">
+            <div class="papel-flag bg-emerald-500 w-10 h-12 md:w-14 md:h-16 flex items-center justify-center text-xl md:text-2xl shadow-lg border-t-4 border-yellow-300">🌮</div>
+            <div class="papel-flag bg-white w-10 h-12 md:w-14 md:h-16 flex items-center justify-center text-xl md:text-2xl shadow-lg border-t-4 border-yellow-300">🇲🇽</div>
+            <div class="papel-flag bg-rose-600 w-10 h-12 md:w-14 md:h-16 flex items-center justify-center text-xl md:text-2xl shadow-lg border-t-4 border-yellow-300">🪅</div>
+            <div class="papel-flag bg-amber-400 w-10 h-12 md:w-14 md:h-16 flex items-center justify-center text-xl md:text-2xl shadow-lg border-t-4 border-yellow-300">🎺</div>
+            <div class="papel-flag bg-purple-600 w-10 h-12 md:w-14 md:h-16 flex items-center justify-center text-xl md:text-2xl shadow-lg border-t-4 border-yellow-300">🤠</div>
+            <div class="papel-flag bg-cyan-500 w-10 h-12 md:w-14 md:h-16 flex items-center justify-center text-xl md:text-2xl shadow-lg border-t-4 border-yellow-300">🎸</div>
+        </div>
+        <h1 class="text-3xl md:text-5xl text-center text-yellow-300 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] tracking-wider animate-bounce-slow">
+            TACO TETRIS FIESTA 🇲🇽
+        </h1>
+        <p id="subHeaderSubtitle" class="text-center text-xs md:text-sm text-amber-200 font-sans font-semibold drop-shadow">
+            ¡10 Niveles de Pura Fiesta! • 200 Puntos para la Victoria
+        </p>
+    </header>
+
+    <main class="container mx-auto px-2 py-2 flex-grow flex flex-col items-center justify-center z-10 max-w-5xl">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 w-full items-start">
+            
+            <div class="lg:col-span-3 flex flex-col space-y-3 order-2 lg:order-1">
+                <div class="bg-black/70 backdrop-blur-md p-4 rounded-2xl border-2 border-amber-400/50 shadow-xl">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-amber-300 text-sm font-bold">NIVEL ACTUAL</span>
+                        <span id="levelDisplay" class="text-3xl font-extrabold text-emerald-400">1 / 10</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-4 border border-amber-300/40 overflow-hidden mb-1">
+                        <div id="progressBar" class="bg-gradient-to-r from-emerald-400 via-yellow-400 to-rose-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-300 font-sans">
+                        <span>Progreso Nivel</span>
+                        <span id="levelProgressText">0 / 20 pts</span>
+                    </div>
+                </div>
+
+                <div class="bg-black/70 backdrop-blur-md p-4 rounded-2xl border-2 border-amber-400/50 shadow-xl text-center">
+                    <div class="text-amber-300 text-sm font-bold tracking-widest uppercase mb-1">Puntuación Total</div>
+                    <div id="scoreDisplay" class="text-4xl text-yellow-300 font-extrabold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">0</div>
+                    <div id="targetScoreDisplay" class="text-xs text-rose-300 mt-1">Meta final: 200 Puntos</div>
+                    
+                    <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-amber-400/20 text-xs font-sans">
+                        <div>
+                            <span class="text-gray-400 block">Líneas</span>
+                            <span id="linesDisplay" class="text-lg font-bold text-white">0</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block">Récord</span>
+                            <span id="highScoreDisplay" class="text-lg font-bold text-amber-300">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-purple-950/80 backdrop-blur-md p-3 rounded-2xl border-2 border-pink-500/50 shadow-xl text-xs font-sans">
+                    <div class="text-amber-300 font-bold mb-2 flex items-center justify-between">
+                        <span><i class="fa-solid fa-music mr-1"></i> Música de Fiesta</span>
+                        <button id="toggleSynthBtn" class="text-[10px] bg-pink-700 hover:bg-pink-600 px-2 py-0.5 rounded text-white">
+                            Sintetizador: ON
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-gray-300 text-[11px]">Audio de Inicio / Fondo:</label>
+                        <audio controls id="bgAudioPlayer" class="w-full h-8 rounded opacity-90 focus:outline-none">
+                            <source src="mexico-saludo.mp3" type="audio/mpeg">
+                            <source src="mexico-saludo.ogg" type="audio/ogg">
+                            Tu navegador no soporta audio HTML5.
+                        </audio>
+
+                        <div class="text-[10px] text-amber-200/80 bg-black/40 p-1.5 rounded border border-amber-500/20">
+                            💡 <b>Personalización:</b> Agrega tus archivos MP3 o MP4 (ej. <code>bg-video.mp4</code>, <code>fiesta.mp3</code>, <code>clear.mp3</code>) en la misma carpeta.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6 flex flex-col items-center justify-center order-1 lg:order-2">
+                <div class="relative">
+                    <canvas id="tetrisCanvas" width="300" height="600" class="board-glow bg-black/80 rounded-2xl max-w-full h-auto cursor-pointer"></canvas>
+
+                    <div id="overlayMenu" class="absolute inset-0 bg-black/50 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center z-20">
+
+                        <div class="text-5xl mb-2 animate-bounce">🇲🇽 🌮 🎺</div>
+                        <h2 id="overlayTitle" class="text-3xl font-extrabold text-yellow-300 mb-2 drop-shadow">¡BIENVENIDO A LA FIESTA!</h2>
+                        <p id="overlaySubtitle" class="text-sm text-gray-200 mb-6 max-w-xs font-sans">
+                            Acomoda Tacos, Sombreros, Banderas y Mariachis para juntar 200 puntos a lo largo de 10 niveles festivos.
+                        </p>
+                        
+                        <button id="startBtn" class="btn-fiesta btn-green px-8 py-4 rounded-full text-xl text-white font-extrabold tracking-wider transform hover:scale-105 active:scale-95 flex items-center space-x-2">
+                            <i class="fa-solid fa-play mr-2"></i>
+                            <span id="startBtnText">¡EMPEZAR FIESTA!</span>
+                        </button>
+
+                        <div class="mt-4 text-xs text-amber-200/70 font-sans">
+                            Controles: Teclado, Táctil o Control de Juego
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 flex flex-col space-y-3 order-3">
+                <div class="bg-black/70 backdrop-blur-md p-4 rounded-2xl border-2 border-amber-400/50 shadow-xl text-center">
+                    <span class="text-amber-300 text-sm font-bold tracking-widest uppercase block mb-2">Siguiente Pieza</span>
+                    <div class="flex justify-center items-center">
+                        <canvas id="nextCanvas" width="120" height="120" class="bg-black/50 rounded-xl border border-amber-300/30"></canvas>
+                    </div>
+                    <div id="pieceNameDisplay" class="text-xs text-emerald-300 font-sans font-semibold mt-2">
+                        🌮 Taco Imperial
+                    </div>
+                </div>
+
+                <div class="bg-black/70 backdrop-blur-md p-4 rounded-2xl border-2 border-amber-400/50 shadow-xl text-xs font-sans">
+                    <h3 class="text-amber-300 font-bold mb-2 flex items-center">
+                        <i class="fa-solid fa-image text-rose-400 mr-2"></i> Imágenes de Bloques
+                    </h3>
+                    <p class="text-gray-300 mb-2">
+                        Las piezas se dibujan con tus imágenes PNG. Si agregas archivos en la carpeta:
+                    </p>
+                    <div class="grid grid-cols-2 gap-1 text-[11px] text-amber-200 bg-white/5 p-2 rounded border border-white/10">
+                        <div>1: Taco</div>
+                        <div>2: Pambazo</div>
+                        <div>3: Quesadilla</div>
+                        <div>4: Pozole</div>
+                        <div>5: Tostada</div>
+                        <div>6: Sombrero</div>
+                        <div>7: Bandera</div>
+                    </div>
+                </div>
+
+                <div class="hidden md:block bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-xs font-sans">
+                    <div class="text-amber-300 font-bold mb-1 flex items-center justify-between">
+                        <span>Controles PC / Mac / Gamepad:</span>
+                        <i class="fa-solid fa-gamepad text-emerald-400"></i>
+                    </div>
+                    <ul class="space-y-1 text-gray-300 text-[11px]">
+                        <li><kbd class="bg-gray-700 px-1 rounded">←</kbd> <kbd class="bg-gray-700 px-1 rounded">→</kbd> o D-Pad: Mover</li>
+                        <li><kbd class="bg-gray-700 px-1 rounded">↑</kbd> o Botón A/X: Rotar pieza</li>
+                        <li><kbd class="bg-gray-700 px-1 rounded">↓</kbd> Caída rápida</li>
+                        <li><kbd class="bg-gray-700 px-1 rounded">Espacio</kbd> o Botón B/Y: Caída instantánea</li>
+                        <li><kbd class="bg-gray-700 px-1 rounded">P</kbd> o Start: Pausar Juego</li>
+                    </ul>
+                    <div id="gamepadBanner" class="hidden mt-2 p-1.5 bg-emerald-900/80 text-emerald-200 text-[10px] rounded border border-emerald-500/50 text-center font-bold">
+                        🎮 Control Conectado
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-md mt-4 bg-black/80 backdrop-blur-md p-3 rounded-3xl border-2 border-amber-400/60 shadow-2xl">
+            <div class="grid grid-cols-3 gap-2">
+                <button id="btnLeft" class="btn-fiesta p-3 rounded-2xl text-2xl text-white flex items-center justify-center active:bg-rose-700">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button id="btnRotate" class="btn-fiesta btn-gold p-3 rounded-2xl text-2xl flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+                <button id="btnRight" class="btn-fiesta p-3 rounded-2xl text-2xl text-white flex items-center justify-center active:bg-rose-700">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <button id="btnSoftDrop" class="btn-fiesta p-3 rounded-2xl text-2xl text-white flex items-center justify-center">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <button id="btnHardDrop" class="btn-fiesta btn-green p-3 rounded-2xl text-2xl text-white flex items-center justify-center">
+                    <i class="fa-solid fa-angles-down"></i>
+                </button>
+                <button id="btnPause" class="btn-fiesta p-3 rounded-2xl text-xl text-yellow-300 flex items-center justify-center">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+   <div class="hidden">
+        <audio id="audioStart" preload="auto"><source src="start.mp3" type="audio/mpeg"><source src="start.ogg" type="audio/ogg"></audio>
+        <audio id="audioClear" preload="auto"><source src="clear.mp3" type="audio/mpeg"><source src="squeaky-clean.ogg" type="audio/ogg"></audio>
+        <audio id="audioGameOver" preload="auto"><source src="gameover.mp3" type="audio/mpeg"><source src="game-over_S7KaC07.ogg" type="audio/ogg"></audio>
+        <audio id="audioRestart" preload="auto"><source src="restart.mp3" type="audio/mpeg"><source src="windows-xp-startup.ogg" type="audio/ogg"></audio>
+        <audio id="audioMove" preload="auto"><source src="move.mp3" type="audio/mpeg"><source src="final-fantasy-viii-sound-effects-cursor-move.ogg" type="audio/ogg"></audio>
+    </div>
+
+    <!-- Hidden Image Tags with URL-encoded SVG Fallbacks -->
+    <div class="hidden">
+        <img id="imgTaco" src="https://static.vecteezy.com/system/resources/previews/051/028/202/non_2x/mexican-tacos-with-beef-and-vegetables-isolated-on-transparent-background-png.png" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M10%2C70%20Q50%2C15%2090%2C70%20Q50%2C95%2010%2C70%20Z%22%20fill%3D%22%23ffcc00%22%20stroke%3D%22%23d4ac0d%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M20%2C62%20Q50%2C30%2080%2C62%22%20fill%3D%22none%22%20stroke%3D%22%2327ae60%22%20stroke-width%3D%228%22%2F%3E%3Cpath%20d%3D%22M25%2C65%20Q50%2C38%2075%2C65%22%20fill%3D%22none%22%20stroke%3D%22%23e74c3c%22%20stroke-width%3D%226%22%2F%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2252%22%20r%3D%224%22%20fill%3D%22%23f39c12%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2254%22%20r%3D%224%22%20fill%3D%22%23f39c12%22%2F%3E%3C%2Fsvg%3E'" alt="Taco">
+        <img id="imgSombrero" src="https://sdlovers.com/images/sandwiches/expansion/pambazo.png" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M30%2C55%20Q50%2C15%2070%2C55%20Z%22%20fill%3D%22%23e67e22%22%2F%3E%3Cellipse%20cx%3D%2250%22%20cy%3D%2265%22%20rx%3D%2245%22%20ry%3D%2218%22%20fill%3D%22%23d35400%22%2F%3E%3Cellipse%20cx%3D%2250%22%20cy%3D%2265%22%20rx%3D%2240%22%20ry%3D%2214%22%20fill%3D%22%23f39c12%22%2F%3E%3Cpath%20d%3D%22M30%2C55%20Q50%2C62%2070%2C55%22%20fill%3D%22none%22%20stroke%3D%22%23c0392b%22%20stroke-width%3D%225%22%2F%3E%3C%2Fsvg%3E'" alt="Sombrero">
+        <img id="imgFlag" src="https://static.vecteezy.com/system/resources/previews/079/568/597/non_2x/chicken-quesadilla-served-on-white-plate-with-salsa-and-guacamole-dips-free-png.png" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20x%3D%2210%22%20y%3D%2220%22%20width%3D%2226%22%20height%3D%2260%22%20fill%3D%22%23006847%22%2F%3E%3Crect%20x%3D%2236%22%20y%3D%2220%22%20width%3D%2228%22%20height%3D%2260%22%20fill%3D%22%23ffffff%22%2F%3E%3Crect%20x%3D%2264%22%20y%3D%2220%22%20width%3D%2226%22%20height%3D%2260%22%20fill%3D%22%23ce1126%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%228%22%20fill%3D%22%23b8860b%22%2F%3E%3C%2Fsvg%3E'" alt="Bandera">
+        <img id="imgMariachi" src="https://www.koblenz.com.mx/cdn/shop/articles/cazuela-pozole_4c74e678-f33e-4e08-9962-0d2929697f0b.png?v=1755115036" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M30%2C35%20C20%2C35%2020%2C55%2035%2C60%20C20%2C65%2020%2C85%2035%2C85%20C55%2C85%2065%2C70%2065%2C60%20C65%2C45%2050%2C35%2030%2C35%20Z%22%20fill%3D%22%23e67e22%22%20stroke%3D%22%23d35400%22%20stroke-width%3D%223%22%2F%3E%3Ccircle%20cx%3D%2242%22%20cy%3D%2260%22%20r%3D%227%22%20fill%3D%22%232c3e50%22%2F%3E%3Cline%20x1%3D%2250%22%20y1%3D%2245%22%20x2%3D%2285%22%20y2%3D%2220%22%20stroke%3D%22%23d35400%22%20stroke-width%3D%226%22%2F%3E%3Ccircle%20cx%3D%2285%22%20cy%3D%2220%22%20r%3D%225%22%20fill%3D%22%23f39c12%22%2F%3E%3C%2Fsvg%3E'" alt="Guitarra Mariachi">
+        <img id="imgChile" src="https://png.pngtree.com/png-clipart/20231019/original/pngtree-tostadas-mexican-food-png-image_13358292.png" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpath%20d%3D%22M55%2C20%20Q65%2C10%2070%2C5%20M55%2C20%20Q30%2C35%2035%2C70%20Q40%2C95%2020%2C95%20Q55%2C90%2065%2C50%20Q70%2C30%2055%2C20%20Z%22%20fill%3D%22%23e74c3c%22%2F%3E%3Cpath%20d%3D%22M50%2C20%20Q55%2C15%2060%2C10%20Q65%2C15%2055%2C25%20Z%22%20fill%3D%22%23228b22%22%2F%3E%3C%2Fsvg%3E'" alt="Chile">
+        <img id="imgPinata" src="https://www.rodeodurango.com/cdn/shop/products/image_b10169aa-4858-49ba-811f-6fb57a4d4525-removebg_1_681x700.png?v=1647637270" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cpolygon%20points%3D%2250%2C20%2080%2C50%2050%2C80%2020%2C50%22%20fill%3D%22%239b59b6%22%2F%3E%3Cpolygon%20points%3D%2250%2C20%2065%2C50%2050%2C80%2035%2C50%22%20fill%3D%22%23f1c40f%22%2F%3E%3Cpolygon%20points%3D%2250%2C5%2055%2C25%2045%2C25%22%20fill%3D%22%23e74c3c%22%2F%3E%3Cpolygon%20points%3D%2250%2C95%2055%2C75%2045%2C75%22%20fill%3D%22%231abc9c%22%2F%3E%3C%2Fsvg%3E'" alt="Piñata">
+        <img id="imgCactus" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Flag_of_Mexico.svg/3840px-Flag_of_Mexico.svg.png" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20x%3D%2242%22%20y%3D%2215%22%20width%3D%2216%22%20height%3D%2275%22%20rx%3D%228%22%20fill%3D%22%2327ae60%22%2F%3E%3Cpath%20d%3D%22M20%2C35%20L20%2C55%20Q20%2C65%2042%2C65%22%20fill%3D%22none%22%20stroke%3D%22%2327ae60%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M80%2C25%20L80%2C45%20Q80%2C55%2058%2C55%22%20fill%3D%22none%22%20stroke%3D%22%2327ae60%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E'" alt="Cactus">
+    </div>
+
+    <script>
+        const GAME_CONFIG = {
+            TOTAL_LEVELS: 20,
+            POINTS_PER_LEVEL: 30,
+            POINTS_PER_LINE: 1,
+            get TARGET_SCORE() {
+                return this.TOTAL_LEVELS * this.POINTS_PER_LEVEL;
+            }
+        };
+
+        function applyConfigToUI() {
+            const levelDisplay = document.getElementById('levelDisplay');
+            if (levelDisplay) levelDisplay.innerText = `1 / ${GAME_CONFIG.TOTAL_LEVELS}`;
+            
+            const targetScoreDisplay = document.getElementById('targetScoreDisplay');
+            if (targetScoreDisplay) targetScoreDisplay.innerText = `Meta final: ${GAME_CONFIG.TARGET_SCORE} Puntos`;
+            
+            const subHeaderSubtitle = document.getElementById('subHeaderSubtitle');
+            if (subHeaderSubtitle) {
+                subHeaderSubtitle.innerText = `¡${GAME_CONFIG.TOTAL_LEVELS} Niveles de Pura Fiesta! • ${GAME_CONFIG.TARGET_SCORE} Puntos para la Victoria`;
+            }
+            
+            const levelProgressText = document.getElementById('levelProgressText');
+            if (levelProgressText) {
+                levelProgressText.innerText = `0 / ${GAME_CONFIG.POINTS_PER_LEVEL} pts`;
+            }
+        }
+
+        class FiestaSoundSystem {
+            constructor() {
+                this.ctx = null;
+                this.useSynth = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playCustomOrSynth(elementId, synthType) {
+                this.init();
+                const audioEl = document.getElementById(elementId);
+                let playedCustom = false;
+
+                if (audioEl && audioEl.currentTime !== undefined) {
+                    audioEl.currentTime = 0;
+                    const promise = audioEl.play();
+                    if (promise !== undefined) {
+                        promise.then(() => {
+                            playedCustom = true;
+                        }).catch(() => {
+                            if (this.useSynth) this.playSynthSound(synthType);
+                        });
+                    }
+                }
+
+                if (!playedCustom && this.useSynth) {
+                    this.playSynthSound(synthType);
+                }
+            }
+
+            playSynthSound(type) {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+
+                try {
+                    switch (type) {
+                        case 'start':
+                            [392, 523.25, 659.25, 783.99].forEach((freq, i) => {
+                                const osc = this.ctx.createOscillator();
+                                const gain = this.ctx.createGain();
+                                osc.type = 'triangle';
+                                osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                                gain.gain.setValueAtTime(0.2, now + i * 0.08);
+                                gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.4);
+                                osc.connect(gain);
+                                gain.connect(this.ctx.destination);
+                                osc.start(now + i * 0.08);
+                                osc.stop(now + i * 0.08 + 0.4);
+                            });
+                            break;
+
+                        case 'clear':
+                            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                                const osc = this.ctx.createOscillator();
+                                const gain = this.ctx.createGain();
+                                osc.type = 'sine';
+                                osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                                gain.gain.setValueAtTime(0.2, now + i * 0.06);
+                                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+                                osc.connect(gain);
+                                gain.connect(this.ctx.destination);
+                                osc.start(now + i * 0.06);
+                                osc.stop(now + i * 0.06 + 0.3);
+                            });
+                            break;
+
+                        case 'gameover':
+                            [300, 280, 260, 220].forEach((freq, i) => {
+                                const osc = this.ctx.createOscillator();
+                                const gain = this.ctx.createGain();
+                                osc.type = 'sawtooth';
+                                osc.frequency.setValueAtTime(freq, now + i * 0.2);
+                                gain.gain.setValueAtTime(0.15, now + i * 0.2);
+                                gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 0.25);
+                                osc.connect(gain);
+                                gain.connect(this.ctx.destination);
+                                osc.start(now + i * 0.2);
+                                osc.stop(now + i * 0.2 + 0.25);
+                            });
+                            break;
+
+                        case 'restart':
+                            const oscR = this.ctx.createOscillator();
+                            const gainR = this.ctx.createGain();
+                            oscR.type = 'square';
+                            oscR.frequency.setValueAtTime(440, now);
+                            oscR.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+                            gainR.gain.setValueAtTime(0.15, now);
+                            gainR.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                            oscR.connect(gainR);
+                            gainR.connect(this.ctx.destination);
+                            oscR.start(now);
+                            oscR.stop(now + 0.2);
+                            break;
+
+                        case 'move':
+                            const clickOsc = this.ctx.createOscillator();
+                            const clickGain = this.ctx.createGain();
+                            clickOsc.type = 'sine';
+                            clickOsc.frequency.setValueAtTime(300, now);
+                            clickGain.gain.setValueAtTime(0.05, now);
+                            clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                            clickOsc.connect(clickGain);
+                            clickGain.connect(this.ctx.destination);
+                            clickOsc.start(now);
+                            clickOsc.stop(now + 0.05);
+                            break;
+                    }
+                } catch (e) {
+                    // Ignore synth errors
+                }
+            }
+        }
+
+        const soundSystem = new FiestaSoundSystem();
+
+        class FireworksEngine {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            explode(x, y, count = 50) {
+                const colors = ['#ff0055', '#00e676', '#ffcc00', '#ffffff', '#aa00ff', '#ff9100'];
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 8 + 2;
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 1,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        radius: Math.random() * 4 + 2,
+                        alpha: 1,
+                        decay: Math.random() * 0.02 + 0.015,
+                        gravity: 0.15
+                    });
+                }
+            }
+
+            launchRandom(bursts = 3) {
+                for (let i = 0; i < bursts; i++) {
+                    setTimeout(() => {
+                        const x = Math.random() * (this.canvas.width * 0.8) + (this.canvas.width * 0.1);
+                        const y = Math.random() * (this.canvas.height * 0.5) + (this.canvas.height * 0.1);
+                        this.explode(x, y, 60);
+                    }, i * 180);
+                }
+            }
+
+            updateAndRender() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += p.gravity;
+                    p.alpha -= p.decay;
+
+                    if (p.alpha <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+
+                    this.ctx.save();
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.shadowBlur = 6;
+                    this.ctx.shadowColor = p.color;
+                    this.ctx.fill();
+                    this.ctx.restore();
+                }
+            }
+        }
+
+        const fireworks = new FireworksEngine(document.getElementById('fireworksCanvas'));
+
+        const COLS = 10;
+        const ROWS = 20;
+
+        const canvas = document.getElementById('tetrisCanvas');
+        const ctx = canvas.getContext('2d');
+        const nextCanvas = document.getElementById('nextCanvas');
+        const nextCtx = nextCanvas.getContext('2d');
+
+        const PIECES = [
+            {
+                name: "🌮 Taco",
+                symbol: "🌮",
+                color: "#ffcc00",
+                imgId: "imgTaco",
+                shape: [
+                    [0, 0, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 0, 0, 0],
+                    [0, 0, 0, 0]
+                ]
+            },
+            {
+                name: "Pambazo",
+                symbol: "🍔",
+                color: "#ff0055",
+                imgId: "imgSombrero",
+                shape: [
+                    [2, 0, 0],
+                    [2, 2, 2],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                name: "Quesadilla",
+                symbol: "🌮",
+                color: "#00e676",
+                imgId: "imgMariachi",
+                shape: [
+                    [0, 0, 3],
+                    [3, 3, 3],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                name: "Pozole",
+                symbol: "🍚",
+                color: "#00994d",
+                imgId: "imgFlag",
+                shape: [
+                    [4, 4],
+                    [4, 4]
+                ]
+            },
+            {
+                name: "Tostada",
+                symbol: "🍿",
+                color: "#ff3300",
+                imgId: "imgChile",
+                shape: [
+                    [0, 5, 5],
+                    [5, 5, 0],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                name: "Sombrero",
+                symbol: "👒",
+                color: "#aa00ff",
+                imgId: "imgPinata",
+                shape: [
+                    [0, 6, 0],
+                    [6, 6, 6],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                name: "Bandera",
+                symbol: "mx",
+                color: "#00b894",
+                imgId: "imgCactus",
+                shape: [
+                    [7, 7, 0],
+                    [0, 7, 7],
+                    [0, 0, 0]
+                ]
+            }
+        ];
+
+        let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let highScore = localStorage.getItem('tacoTetrisHighScore') || 0;
+        let gameOver = false;
+        let isPaused = false;
+        let gameStarted = false;
+        let dropCounter = 0;
+        let dropInterval = 1000;
+        let lastTime = 0;
+
+        let currentPiece = null;
+        let nextPiece = null;
+
+        document.getElementById('highScoreDisplay').innerText = highScore;
+
+        let gamepadState = {
+            lastTime: 0,
+            repeatDelay: 120,
+            buttonPressed: {}
+        };
+
+        function pollGamepad() {
+            const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            if (!gamepads) return;
+
+            let gp = null;
+            for (let i = 0; i < gamepads.length; i++) {
+                if (gamepads[i] && gamepads[i].connected) {
+                    gp = gamepads[i];
+                    break;
+                }
+            }
+
+            if (!gp || !gameStarted || isPaused || gameOver) return;
+
+            const now = Date.now();
+
+            const axisX = gp.axes[0] !== undefined ? gp.axes[0] : 0;
+            const axisY = gp.axes[1] !== undefined ? gp.axes[1] : 0;
+
+            const btnLeft = gp.buttons[14]?.pressed || axisX < -0.5;
+            const btnRight = gp.buttons[15]?.pressed || axisX > 0.5;
+            const btnUp = gp.buttons[12]?.pressed || axisY < -0.5;
+            const btnDown = gp.buttons[13]?.pressed || axisY > 0.5;
+
+            const btnRotate = gp.buttons[0]?.pressed || gp.buttons[2]?.pressed;
+            const btnHardDrop = gp.buttons[1]?.pressed || gp.buttons[3]?.pressed;
+            const btnPause = gp.buttons[9]?.pressed || gp.buttons[8]?.pressed;
+
+            if (now - gamepadState.lastTime > gamepadState.repeatDelay) {
+                if (btnLeft) {
+                    currentPiece.x--;
+                    if (collide(board, currentPiece)) currentPiece.x++;
+                    else soundSystem.playCustomOrSynth('audioMove', 'move');
+                    gamepadState.lastTime = now;
+                } else if (btnRight) {
+                    currentPiece.x++;
+                    if (collide(board, currentPiece)) currentPiece.x--;
+                    else soundSystem.playCustomOrSynth('audioMove', 'move');
+                    gamepadState.lastTime = now;
+                } else if (btnDown) {
+                    dropPiece();
+                    gamepadState.lastTime = now;
+                }
+            }
+
+            if (btnUp && !gamepadState.buttonPressed['Up']) {
+                playerRotate();
+                gamepadState.buttonPressed['Up'] = true;
+            } else if (!btnUp) {
+                gamepadState.buttonPressed['Up'] = false;
+            }
+
+            if (btnRotate && !gamepadState.buttonPressed['Rotate']) {
+                playerRotate();
+                gamepadState.buttonPressed['Rotate'] = true;
+            } else if (!btnRotate) {
+                gamepadState.buttonPressed['Rotate'] = false;
+            }
+
+            if (btnHardDrop && !gamepadState.buttonPressed['HardDrop']) {
+                hardDrop();
+                gamepadState.buttonPressed['HardDrop'] = true;
+            } else if (!btnHardDrop) {
+                gamepadState.buttonPressed['HardDrop'] = false;
+            }
+
+            if (btnPause && !gamepadState.buttonPressed['Pause']) {
+                togglePause();
+                gamepadState.buttonPressed['Pause'] = true;
+            } else if (!btnPause) {
+                gamepadState.buttonPressed['Pause'] = false;
+            }
+        }
+
+        window.addEventListener("gamepadconnected", (e) => {
+            const banner = document.getElementById('gamepadBanner');
+            if (banner) {
+                banner.classList.remove('hidden');
+                banner.innerText = `🎮 Control Conectado: ${e.gamepad.id.substring(0, 20)}`;
+            }
+        });
+
+        window.addEventListener("gamepaddisconnected", () => {
+            const banner = document.getElementById('gamepadBanner');
+            if (banner) {
+                banner.classList.add('hidden');
+            }
+        });
+
+        function gameLoop(time = 0) {
+            fireworks.updateAndRender();
+            pollGamepad();
+
+            if (gameStarted && !isPaused && !gameOver) {
+                const deltaTime = time - lastTime;
+                lastTime = time;
+                dropCounter += deltaTime;
+
+                if (dropCounter > dropInterval) {
+                    dropPiece();
+                }
+
+                drawBoard();
+                drawCurrentPiece();
+            } else {
+                lastTime = time;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function createPiece() {
+            const index = Math.floor(Math.random() * PIECES.length);
+            const pieceDef = PIECES[index];
+            const matrix = pieceDef.shape.map(row => [...row]);
+            return {
+                matrix: matrix,
+                x: Math.floor((COLS - matrix[0].length) / 2),
+                y: 0,
+                value: index + 1,
+                name: pieceDef.name,
+                symbol: pieceDef.symbol
+            };
+        }
+
+        function startGame() {
+            soundSystem.playCustomOrSynth('audioStart', 'start');
+            fireworks.launchRandom(3);
+
+            board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+            score = 0;
+            lines = 0;
+            level = 1;
+            dropInterval = 1000;
+            gameOver = false;
+            isPaused = false;
+            gameStarted = true;
+
+            currentPiece = createPiece();
+            nextPiece = createPiece();
+
+            updateUI();
+            drawNextPiece();
+
+            document.getElementById('overlayMenu').classList.add('hidden');
+
+            const bgAudio = document.getElementById('bgAudioPlayer');
+            if (bgAudio && bgAudio.paused) {
+                bgAudio.play().catch(() => {});
+            }
+        }
+
+        function togglePause() {
+            if (!gameStarted || gameOver) return;
+            isPaused = !isPaused;
+            const overlay = document.getElementById('overlayMenu');
+
+            if (isPaused) {
+                document.getElementById('overlayTitle').innerText = "JUEGO PAUSADO";
+                document.getElementById('overlaySubtitle').innerText = "Tómate un descanso y continúa cuando estés listo.";
+                document.getElementById('startBtnText').innerText = "CONTINUAR FIESTA";
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function triggerGameOver() {
+            gameOver = true;
+            soundSystem.playCustomOrSynth('audioGameOver', 'gameover');
+
+            const overlay = document.getElementById('overlayMenu');
+            document.getElementById('overlayTitle').innerText = "¡FIN DEL JUEGO!";
+            document.getElementById('overlaySubtitle').innerText = `Lograste ${score} puntos en el Nivel ${level}. ¡Inténtalo de nuevo!`;
+            document.getElementById('startBtnText').innerText = "REINICIAR FIESTA";
+            overlay.classList.remove('hidden');
+        }
+
+        function triggerVictory() {
+            gameOver = true;
+            fireworks.launchRandom(8);
+            soundSystem.playCustomOrSynth('audioStart', 'start');
+
+            const overlay = document.getElementById('overlayMenu');
+            document.getElementById('overlayTitle').innerText = "¡CAMPEÓN DE LA FIESTA! 🏆";
+            document.getElementById('overlaySubtitle').innerText = `¡Felicidades! Completaste los ${GAME_CONFIG.TOTAL_LEVELS} Niveles y alcanzaste los ${GAME_CONFIG.TARGET_SCORE} Puntos Totales. ¡Viva México! 🇲🇽`;
+            document.getElementById('startBtnText').innerText = "JUGAR DE NUEVO";
+            overlay.classList.remove('hidden');
+        }
+
+        function collide(boardMatrix, piece) {
+            const m = piece.matrix;
+            for (let r = 0; r < m.length; r++) {
+                for (let c = 0; c < m[r].length; c++) {
+                    if (m[r][c] !== 0) {
+                        const newY = piece.y + r;
+                        const newX = piece.x + c;
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) {
+                            return true;
+                        }
+                        if (newY >= 0 && boardMatrix[newY][newX] !== 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function merge(boardMatrix, piece) {
+            piece.matrix.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    if (val !== 0) {
+                        const boardY = piece.y + r;
+                        const boardX = piece.x + c;
+                        if (boardY >= 0 && boardY < ROWS && boardX >= 0 && boardX < COLS) {
+                            boardMatrix[boardY][boardX] = val;
+                        }
+                    }
+                });
+            });
+        }
+
+        function clearLines() {
+            let totalLinesCleared = 0;
+            let comboCount = 0;
+            let stepCleared = 0;
+
+            do {
+                stepCleared = 0;
+                let fullRows = [];
+
+                for (let r = 0; r < ROWS; r++) {
+                    let isFull = true;
+                    for (let c = 0; c < COLS; c++) {
+                        if (board[r][c] === 0) {
+                            isFull = false;
+                            break;
+                        }
+                    }
+                    if (isFull) {
+                        fullRows.push(r);
+                    }
+                }
+
+                if (fullRows.length > 0) {
+                    stepCleared = fullRows.length;
+                    totalLinesCleared += stepCleared;
+                    comboCount++;
+
+                    for (let r of fullRows) {
+                        for (let c = 0; c < COLS; c++) {
+                            board[r][c] = 0;
+                        }
+                    }
+
+                    for (let c = 0; c < COLS; c++) {
+                        let emptySpot = ROWS - 1;
+                        for (let r = ROWS - 1; r >= 0; r--) {
+                            if (board[r][c] !== 0) {
+                                if (r !== emptySpot) {
+                                    board[emptySpot][c] = board[r][c];
+                                    board[r][c] = 0;
+                                }
+                                emptySpot--;
+                            }
+                        }
+                    }
+                }
+            } while (stepCleared > 0);
+
+            if (totalLinesCleared > 0) {
+                soundSystem.playCustomOrSynth('audioClear', 'clear');
+                fireworks.explode(canvas.width / 2, canvas.height / 2, 40 * comboCount);
+
+                const comboBonus = comboCount > 1 ? comboCount * 10 : 0;
+                lines += totalLinesCleared;
+                score += (totalLinesCleared * GAME_CONFIG.POINTS_PER_LINE) + comboBonus;
+
+                if (comboCount > 1) {
+                    showComboBanner(`¡COMBO X${comboCount}! ¡FIESTA CASCADA! 🇲🇽✨`);
+                }
+
+                const calculatedLevel = Math.floor(score / GAME_CONFIG.POINTS_PER_LEVEL) + 1;
+
+                if (score >= GAME_CONFIG.TARGET_SCORE) {
+                    updateUI();
+                    triggerVictory();
+                    return;
+                }
+
+                if (calculatedLevel > level && level < GAME_CONFIG.TOTAL_LEVELS) {
+                    level = Math.min(calculatedLevel, GAME_CONFIG.TOTAL_LEVELS);
+                    dropInterval = Math.max(150, 1000 - (level - 1) * 85);
+                    fireworks.launchRandom(2 + comboCount);
+                }
+
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('tacoTetrisHighScore', highScore);
+                }
+
+                updateUI();
+            }
+        }
+
+        function showComboBanner(text) {
+            let banner = document.getElementById('comboBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'comboBanner';
+                banner.className = 'fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-400 text-black font-extrabold text-xl md:text-3xl px-6 py-3 rounded-full border-4 border-rose-600 shadow-2xl z-50 transition-all duration-300 pointer-events-none scale-0 opacity-0';
+                document.body.appendChild(banner);
+            }
+
+            banner.innerText = text;
+            banner.classList.remove('scale-0', 'opacity-0');
+            banner.classList.add('scale-110', 'opacity-100');
+
+            setTimeout(() => {
+                banner.classList.remove('scale-110', 'opacity-100');
+                banner.classList.add('scale-0', 'opacity-0');
+            }, 1200);
+        }
+
+        function dropPiece() {
+            if (!currentPiece) return;
+            currentPiece.y++;
+            if (collide(board, currentPiece)) {
+                currentPiece.y--;
+                merge(board, currentPiece);
+                clearLines();
+                currentPiece = nextPiece;
+                nextPiece = createPiece();
+                drawNextPiece();
+                if (collide(board, currentPiece)) {
+                    triggerGameOver();
+                }
+            }
+            dropCounter = 0;
+        }
+
+        function hardDrop() {
+            if (!currentPiece || !gameStarted || isPaused || gameOver) return;
+            while (!collide(board, currentPiece)) {
+                currentPiece.y++;
+            }
+            currentPiece.y--;
+            merge(board, currentPiece);
+            soundSystem.playCustomOrSynth('audioMove', 'move');
+            clearLines();
+            currentPiece = nextPiece;
+            nextPiece = createPiece();
+            drawNextPiece();
+            if (collide(board, currentPiece)) {
+                triggerGameOver();
+            }
+            dropCounter = 0;
+        }
+
+        function playerRotate() {
+            if (!currentPiece || !gameStarted || isPaused || gameOver) return;
+            const originalMatrix = currentPiece.matrix;
+            currentPiece.matrix = rotate(currentPiece.matrix);
+
+            let offset = 1;
+            while (collide(board, currentPiece)) {
+                currentPiece.x += offset;
+                offset = -(offset + (offset > 0 ? 1 : -1));
+                if (offset > currentPiece.matrix[0].length) {
+                    currentPiece.matrix = originalMatrix;
+                    return;
+                }
+            }
+            soundSystem.playCustomOrSynth('audioMove', 'move');
+        }
+
+        function rotate(matrix) {
+            const result = [];
+            for (let i = 0; i < matrix[0].length; i++) {
+                const row = [];
+                for (let j = matrix.length - 1; j >= 0; j--) {
+                    row.push(matrix[j][i]);
+                }
+                result.push(row);
+            }
+            return result;
+        }
+
+        function drawTile(ctxToDraw, x, y, value, size = 30) {
+            if (value === 0) return;
+
+            const pieceDef = PIECES[value - 1];
+            const imgElement = document.getElementById(pieceDef.imgId);
+
+            if (imgElement && imgElement.complete && imgElement.naturalWidth !== 0) {
+                ctxToDraw.drawImage(imgElement, x, y, size, size);
+            } else {
+                ctxToDraw.fillStyle = pieceDef.color;
+                ctxToDraw.beginPath();
+                if (ctxToDraw.roundRect) {
+                    ctxToDraw.roundRect(x + 1, y + 1, size - 2, size - 2, 6);
+                } else {
+                    ctxToDraw.rect(x + 1, y + 1, size - 2, size - 2);
+                }
+                ctxToDraw.fill();
+                ctxToDraw.strokeStyle = '#ffffff';
+                ctxToDraw.lineWidth = 1;
+                ctxToDraw.stroke();
+
+                ctxToDraw.font = `${Math.floor(size * 0.6)}px sans-serif`;
+                ctxToDraw.textAlign = 'center';
+                ctxToDraw.textBaseline = 'middle';
+                ctxToDraw.fillText(pieceDef.symbol, x + size / 2, y + size / 2);
+            }
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const tileSize = canvas.width / COLS;
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
+                }
+            }
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c] !== 0) {
+                        drawTile(ctx, c * tileSize, r * tileSize, board[r][c], tileSize);
+                    }
+                }
+            }
+        }
+
+        function drawCurrentPiece() {
+            if (!currentPiece) return;
+            const tileSize = canvas.width / COLS;
+            currentPiece.matrix.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    if (val !== 0) {
+                        drawTile(ctx, (currentPiece.x + c) * tileSize, (currentPiece.y + r) * tileSize, currentPiece.value, tileSize);
+                    }
+                });
+            });
+        }
+
+        function drawNextPiece() {
+            nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+            if (!nextPiece) return;
+
+            const matrix = nextPiece.matrix;
+            const tileSize = 24;
+            const offsetX = (nextCanvas.width - matrix[0].length * tileSize) / 2;
+            const offsetY = (nextCanvas.height - matrix.length * tileSize) / 2;
+
+            matrix.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    if (val !== 0) {
+                        drawTile(nextCtx, offsetX + c * tileSize, offsetY + r * tileSize, nextPiece.value, tileSize);
+                    }
+                });
+            });
+
+            document.getElementById('pieceNameDisplay').innerText = nextPiece.name;
+        }
+
+        function updateUI() {
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('linesDisplay').innerText = lines;
+            document.getElementById('levelDisplay').innerText = `${level} / ${GAME_CONFIG.TOTAL_LEVELS}`;
+            
+            const currentLevelPoints = score % GAME_CONFIG.POINTS_PER_LEVEL;
+            const progressPercent = Math.min(100, (currentLevelPoints / GAME_CONFIG.POINTS_PER_LEVEL) * 100);
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+            document.getElementById('levelProgressText').innerText = `${currentLevelPoints} / ${GAME_CONFIG.POINTS_PER_LEVEL} pts`;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (!gameStarted || isPaused || gameOver) return;
+
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Spacebar'].includes(e.key)) {
+                e.preventDefault();
+            }
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    currentPiece.x--;
+                    if (collide(board, currentPiece)) currentPiece.x++;
+                    else soundSystem.playCustomOrSynth('audioMove', 'move');
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    currentPiece.x++;
+                    if (collide(board, currentPiece)) currentPiece.x--;
+                    else soundSystem.playCustomOrSynth('audioMove', 'move');
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    dropPiece();
+                    break;
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    playerRotate();
+                    break;
+                case ' ':
+                    hardDrop();
+                    break;
+                case 'p':
+                case 'P':
+                    togglePause();
+                    break;
+            }
+        });
+
+        document.getElementById('btnLeft').addEventListener('click', () => {
+            if (!gameStarted || isPaused || gameOver) return;
+            currentPiece.x--;
+            if (collide(board, currentPiece)) currentPiece.x++;
+            else soundSystem.playCustomOrSynth('audioMove', 'move');
+        });
+
+        document.getElementById('btnRight').addEventListener('click', () => {
+            if (!gameStarted || isPaused || gameOver) return;
+            currentPiece.x++;
+            if (collide(board, currentPiece)) currentPiece.x--;
+            else soundSystem.playCustomOrSynth('audioMove', 'move');
+        });
+
+        document.getElementById('btnRotate').addEventListener('click', () => {
+            playerRotate();
+        });
+
+        document.getElementById('btnSoftDrop').addEventListener('click', () => {
+            if (!gameStarted || isPaused || gameOver) return;
+            dropPiece();
+        });
+
+        document.getElementById('btnHardDrop').addEventListener('click', () => {
+            hardDrop();
+        });
+
+        document.getElementById('btnPause').addEventListener('click', () => {
+            togglePause();
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (!gameStarted || gameOver) {
+                startGame();
+            } else if (isPaused) {
+                togglePause();
+            }
+        });
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (!gameStarted || isPaused || gameOver) return;
+            if (e.changedTouches.length === 1) {
+                const diffX = e.changedTouches[0].clientX - touchStartX;
+                const diffY = e.changedTouches[0].clientY - touchStartY;
+
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > 30) {
+                        if (diffX > 0) {
+                            currentPiece.x++;
+                            if (collide(board, currentPiece)) currentPiece.x--;
+                            else soundSystem.playCustomOrSynth('audioMove', 'move');
+                        } else {
+                            currentPiece.x--;
+                            if (collide(board, currentPiece)) currentPiece.x++;
+                            else soundSystem.playCustomOrSynth('audioMove', 'move');
+                        }
+                    }
+                } else {
+                    if (Math.abs(diffY) > 30) {
+                        if (diffY > 0) {
+                            dropPiece();
+                        } else {
+                            playerRotate();
+                        }
+                    }
+                }
+            }
+        }, { passive: true });
+
+        document.getElementById('toggleSynthBtn').addEventListener('click', () => {
+            soundSystem.useSynth = !soundSystem.useSynth;
+            const btn = document.getElementById('toggleSynthBtn');
+            btn.innerText = `Sintetizador: ${soundSystem.useSynth ? 'ON' : 'OFF'}`;
+            btn.className = `text-[10px] ${soundSystem.useSynth ? 'bg-pink-700 hover:bg-pink-600' : 'bg-gray-700 hover:bg-gray-600'} px-2 py-0.5 rounded text-white`;
+        });
+
+        window.onload = function() {
+            applyConfigToUI();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
